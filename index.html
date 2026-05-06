@@ -1,0 +1,290 @@
+
+<h2 class="sr-only">ClinicFind Las Piñas — search for medical tests available at local clinics, view prices and contact details</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+
+.header {
+  padding: 2rem 0 1.5rem;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  margin-bottom: 2rem;
+}
+.logo { font-size: 20px; font-weight: 500; color: var(--color-text-primary); letter-spacing: -0.5px; }
+.logo span { color: #1D9E75; }
+.tagline { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+.search-row {
+  display: flex; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.search-row input[type="text"] {
+  flex: 2; min-width: 180px;
+}
+.search-row select { flex: 1; min-width: 140px; }
+
+.filter-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.filter-chip {
+  font-size: 12px; padding: 5px 12px; border-radius: 999px;
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary); cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip.active {
+  background: #E1F5EE; border-color: #1D9E75; color: #0F6E56;
+}
+.filter-chip:hover { border-color: var(--color-border-primary); color: var(--color-text-primary); }
+
+.results-label {
+  font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 1rem;
+}
+
+.clinic-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.clinic-card:hover { border-color: var(--color-border-primary); }
+.clinic-card.expanded { border-color: #1D9E75; }
+
+.clinic-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.clinic-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.clinic-area { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.clinic-badge {
+  font-size: 11px; padding: 3px 10px; border-radius: 999px;
+  background: #E1F5EE; color: #0F6E56; white-space: nowrap;
+}
+
+.clinic-meta {
+  display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+}
+.clinic-meta-item { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 5px; }
+.clinic-meta-item i { font-size: 14px; }
+
+.tests-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px; margin-top: 1rem; padding-top: 1rem;
+  border-top: 0.5px solid var(--color-border-tertiary);
+}
+.test-item {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 10px 12px;
+}
+.test-name { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+.test-type { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1px; }
+.test-price { font-size: 14px; font-weight: 500; color: #0F6E56; margin-top: 6px; }
+
+.contact-row {
+  display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap;
+}
+.contact-btn {
+  font-size: 12px; padding: 7px 14px; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
+}
+.contact-btn:hover { border-color: #1D9E75; color: #0F6E56; }
+.contact-btn i { font-size: 14px; }
+
+.no-results {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--color-text-tertiary); font-size: 14px;
+}
+
+.chevron { transition: transform 0.2s; font-size: 16px; color: var(--color-text-tertiary); }
+.chevron.open { transform: rotate(180deg); }
+
+.powered {
+  font-size: 11px; color: var(--color-text-tertiary);
+  text-align: center; padding: 1.5rem 0 0.5rem;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  margin-top: 1.5rem;
+}
+</style>
+
+<div class="header">
+  <div class="logo">clinic<span>find</span> <span style="font-weight:400;font-size:14px;color:var(--color-text-tertiary)">Las Piñas</span></div>
+  <div class="tagline">Find medical tests near you — availability & prices across local clinics</div>
+</div>
+
+<div class="search-row">
+  <input type="text" id="searchInput" placeholder="Search by test name (e.g. CBC, X-ray, Urinalysis)..." oninput="render()" />
+  <select id="filterClinic" onchange="render()">
+    <option value="">All clinics</option>
+  </select>
+</div>
+
+<div class="filter-row" id="categoryFilters"></div>
+
+<div class="results-label" id="resultsLabel"></div>
+<div id="clinicList"></div>
+
+<div class="powered">prototype · Las Piñas coverage only · data is illustrative</div>
+
+<script>
+const CATEGORIES = ["All","Laboratory","Imaging","Cardiology","Pulmonology","Ophthalmology"];
+
+const CLINICS = [
+  {
+    id:1, name:"St. Luke's Medical Extension Clinic", area:"CAA Road, Pamplona",
+    phone:"(02) 8563-4444", email:"inquiries.laspinas@stlukes.com.ph",
+    tests:[
+      {name:"Complete Blood Count (CBC)",cat:"Laboratory",price:350},
+      {name:"Fasting Blood Sugar",cat:"Laboratory",price:180},
+      {name:"Urinalysis",cat:"Laboratory",price:150},
+      {name:"Chest X-ray (PA view)",cat:"Imaging",price:650},
+      {name:"12-lead ECG",cat:"Cardiology",price:450},
+    ]
+  },
+  {
+    id:2, name:"Las Piñas Doctors Hospital OPD",area:"Alabang-Zapote Rd, Pamplona Tres",
+    phone:"(02) 8842-0000", email:"opd@lpdhospital.ph",
+    tests:[
+      {name:"Complete Blood Count (CBC)",cat:"Laboratory",price:320},
+      {name:"Lipid Profile",cat:"Laboratory",price:580},
+      {name:"HbA1c",cat:"Laboratory",price:750},
+      {name:"Ultrasound (Whole Abdomen)",cat:"Imaging",price:1200},
+      {name:"Chest X-ray (PA view)",cat:"Imaging",price:600},
+      {name:"Pulmonary Function Test",cat:"Pulmonology",price:1500},
+    ]
+  },
+  {
+    id:3, name:"Ospital ng Las Piñas", area:"Pamplona Tres, Las Piñas City",
+    phone:"(02) 8805-9999", email:"info@olp.gov.ph",
+    tests:[
+      {name:"Complete Blood Count (CBC)",cat:"Laboratory",price:120},
+      {name:"Urinalysis",cat:"Laboratory",price:80},
+      {name:"Fecalysis",cat:"Laboratory",price:80},
+      {name:"Chest X-ray (PA view)",cat:"Imaging",price:350},
+      {name:"12-lead ECG",cat:"Cardiology",price:250},
+    ]
+  },
+  {
+    id:4, name:"PhilMed Diagnostic Center", area:"BF Homes, Las Piñas",
+    phone:"(02) 8826-7700", email:"hello@philmedlaspinas.com",
+    tests:[
+      {name:"HbA1c",cat:"Laboratory",price:700},
+      {name:"Thyroid Function Test (T3/T4/TSH)",cat:"Laboratory",price:1800},
+      {name:"Hepatitis B Surface Antigen",cat:"Laboratory",price:450},
+      {name:"Ultrasound (Whole Abdomen)",cat:"Imaging",price:1100},
+      {name:"2D Echo",cat:"Cardiology",price:2500},
+      {name:"Visual Acuity Test",cat:"Ophthalmology",price:300},
+    ]
+  },
+  {
+    id:5, name:"MedExpress Las Piñas", area:"Alabang-Zapote Rd, Las Piñas",
+    phone:"(02) 8519-3300", email:"laspinas@medexpress.ph",
+    tests:[
+      {name:"Drug Test (DOLE/pre-employment)",cat:"Laboratory",price:400},
+      {name:"Complete Blood Count (CBC)",cat:"Laboratory",price:300},
+      {name:"Fasting Blood Sugar",cat:"Laboratory",price:160},
+      {name:"Chest X-ray (PA view)",cat:"Imaging",price:580},
+    ]
+  }
+];
+
+let expanded = new Set();
+let activeCategory = "All";
+
+function buildFilters() {
+  const row = document.getElementById("categoryFilters");
+  row.innerHTML = CATEGORIES.map(c =>
+    `<div class="filter-chip${c===activeCategory?' active':''}" onclick="setCategory('${c}')">${c}</div>`
+  ).join('');
+}
+
+function buildClinicSelect() {
+  const sel = document.getElementById("filterClinic");
+  CLINICS.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.id; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+
+function setCategory(cat) {
+  activeCategory = cat; render();
+}
+
+function getFiltered() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const clinicId = parseInt(document.getElementById("filterClinic").value) || 0;
+
+  return CLINICS.map(clinic => {
+    if (clinicId && clinic.id !== clinicId) return null;
+    const tests = clinic.tests.filter(t => {
+      const catMatch = activeCategory === "All" || t.cat === activeCategory;
+      const qMatch = !q || t.name.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q);
+      return catMatch && qMatch;
+    });
+    if (!tests.length) return null;
+    return { ...clinic, tests };
+  }).filter(Boolean);
+}
+
+function render() {
+  buildFilters();
+  const results = getFiltered();
+  document.getElementById("resultsLabel").textContent =
+    results.length === 0 ? "" : `${results.length} clinic${results.length>1?'s':''} found`;
+
+  const list = document.getElementById("clinicList");
+  if (!results.length) {
+    list.innerHTML = `<div class="no-results"><i class="ti ti-search" style="font-size:28px;display:block;margin-bottom:8px" aria-hidden="true"></i>No matching tests found in Las Piñas</div>`;
+    return;
+  }
+
+  list.innerHTML = results.map(clinic => {
+    const isOpen = expanded.has(clinic.id);
+    const testsHtml = isOpen ? `
+      <div class="tests-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr))">
+        ${clinic.tests.map(t => `
+          <div class="test-item">
+            <div class="test-name">${t.name}</div>
+            <div class="test-type">${t.cat}</div>
+            <div class="test-price">₱${t.price.toLocaleString()}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="contact-row">
+        <div class="contact-btn"><i class="ti ti-phone" aria-hidden="true"></i>${clinic.phone}</div>
+        <div class="contact-btn"><i class="ti ti-mail" aria-hidden="true"></i>${clinic.email}</div>
+      </div>
+    ` : '';
+
+    return `
+      <div class="clinic-card${isOpen?' expanded':''}" onclick="toggle(${clinic.id})">
+        <div class="clinic-header">
+          <div>
+            <div class="clinic-name">${clinic.name}</div>
+            <div class="clinic-area"><i class="ti ti-map-pin" style="font-size:12px" aria-hidden="true"></i> ${clinic.area}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="clinic-badge">${clinic.tests.length} test${clinic.tests.length>1?'s':''}</div>
+            <i class="ti ti-chevron-down chevron${isOpen?' open':''}" aria-hidden="true"></i>
+          </div>
+        </div>
+        ${testsHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggle(id) {
+  if (expanded.has(id)) expanded.delete(id);
+  else expanded.add(id);
+  render();
+}
+
+buildClinicSelect();
+render();
+</script>
