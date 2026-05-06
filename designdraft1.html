@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClinicFind — Medical Tests in Las Piñas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1a6b4a;
+    --green-light: #e8f5ee;
+    --green-mid: #2d9467;
+    --green-pale: #f0faf5;
+    --text: #111;
+    --text-mid: #444;
+    --text-muted: #888;
+    --border: #e4e4e0;
+    --surface: #fafaf8;
+    --white: #fff;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--text); text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-logo .dot { color: var(--green-mid); }
+  .nav-tagline {
+    font-size: 13px; color: var(--text-muted);
+    border-left: 1px solid var(--border); padding-left: 14px; margin-left: 4px;
+  }
+  .nav-badge {
+    font-size: 12px; padding: 5px 14px; border-radius: 999px;
+    background: var(--green-light); color: var(--green);
+    font-weight: 500; letter-spacing: 0.01em;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 80px 5vw 60px;
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .hero-label {
+    font-size: 12px; font-weight: 500; color: var(--green-mid);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+  }
+  .hero-label::before {
+    content: ''; width: 24px; height: 1px; background: var(--green-mid);
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 54px);
+    line-height: 1.1; color: var(--text);
+    margin-bottom: 20px;
+  }
+  .hero h1 em {
+    font-style: italic; color: var(--green-mid);
+  }
+  .hero-sub {
+    font-size: 17px; color: var(--text-mid);
+    line-height: 1.7; margin-bottom: 32px;
+    font-weight: 300;
+  }
+  .hero-stats {
+    display: flex; gap: 28px;
+  }
+  .hero-stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--text); display: block;
+  }
+  .hero-stat-label {
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  /* HERO CARD (right side) */
+  .hero-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(45,148,103,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .search-label { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .search-wrap {
+    position: relative; margin-bottom: 12px;
+  }
+  .search-wrap input {
+    width: 100%; padding: 14px 48px 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--text);
+    background: var(--white);
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--green-mid); }
+  .search-wrap input::placeholder { color: var(--text-muted); }
+  .search-icon {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); pointer-events: none;
+  }
+  .search-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .quick-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+  .quick-tag {
+    font-size: 12px; padding: 5px 12px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-mid);
+    background: var(--white); cursor: pointer; transition: all 0.15s;
+  }
+  .quick-tag:hover { border-color: var(--green-mid); color: var(--green); }
+  .quick-tag.active { background: var(--green-light); border-color: var(--green-mid); color: var(--green); }
+
+  /* RESULT MINI CARDS */
+  .mini-results { display: flex; flex-direction: column; gap: 8px; }
+  .mini-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.15s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .mini-card:hover { border-color: var(--green-mid); transform: translateX(2px); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .mini-card-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .mini-card-loc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .mini-card-price { font-size: 14px; font-weight: 500; color: var(--green); white-space: nowrap; }
+
+  /* DIVIDER */
+  .section-divider {
+    max-width: 1100px; margin: 0 auto;
+    border: none; border-top: 1px solid var(--border);
+  }
+
+  /* SEARCH SECTION (full) */
+  .search-section {
+    max-width: 1100px; margin: 0 auto; padding: 60px 5vw;
+  }
+  .section-header { margin-bottom: 32px; }
+  .section-eyebrow {
+    font-size: 12px; font-weight: 500; color: var(--green-mid);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; color: var(--text);
+  }
+
+  .search-controls {
+    display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .search-controls input[type="text"] {
+    flex: 2; min-width: 200px;
+    padding: 13px 16px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    outline: none; transition: border-color 0.2s; background: var(--white);
+  }
+  .search-controls input:focus { border-color: var(--green-mid); }
+  .search-controls select {
+    flex: 1; min-width: 150px;
+    padding: 13px 14px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--white); outline: none; cursor: pointer;
+    color: var(--text);
+  }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .chip {
+    font-size: 13px; padding: 7px 16px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--white);
+    color: var(--text-mid); cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .chip.active { background: var(--green); border-color: var(--green); color: #fff; }
+  .chip:hover:not(.active) { border-color: var(--green-mid); color: var(--green); }
+
+  .results-meta {
+    font-size: 13px; color: var(--text-muted); margin-bottom: 16px;
+  }
+
+  /* CLINIC CARDS */
+  .clinic-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .clinic-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .clinic-card:hover { border-color: #c0d8cc; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+  .clinic-card.open { border-color: var(--green-mid); }
+
+  .clinic-top {
+    padding: 20px 24px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .clinic-left { display: flex; align-items: center; gap: 16px; flex: 1; }
+  .clinic-avatar {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--green-light); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .clinic-avatar svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  .clinic-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .clinic-loc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .clinic-right { display: flex; align-items: center; gap: 12px; }
+  .test-count {
+    font-size: 12px; padding: 4px 12px; border-radius: 999px;
+    background: var(--green-pale); color: var(--green); font-weight: 500;
+    border: 1px solid var(--green-light);
+  }
+  .chevron {
+    color: var(--text-muted); transition: transform 0.25s;
+  }
+  .chevron svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .clinic-card.open .chevron { transform: rotate(180deg); }
+
+  /* EXPANDED */
+  .clinic-body {
+    display: none; border-top: 1px solid var(--border);
+    padding: 20px 24px;
+    background: var(--surface);
+  }
+  .clinic-card.open .clinic-body { display: block; }
+
+  .tests-label { font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .tests-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px; margin-bottom: 20px;
+  }
+  .test-pill {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+  }
+  .test-pill-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .test-pill-cat  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .test-pill-price { font-size: 16px; font-weight: 500; color: var(--green); margin-top: 8px; }
+
+  .contact-strip {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .contact-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text-mid);
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 14px;
+    text-decoration: none; transition: all 0.15s;
+  }
+  .contact-item:hover { border-color: var(--green-mid); color: var(--green); }
+  .contact-item svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+
+  /* NO RESULTS */
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .no-results-icon { font-size: 40px; margin-bottom: 12px; }
+  .no-results p { font-size: 15px; }
+
+  /* HOW IT WORKS */
+  .how-section {
+    background: var(--surface); border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 70px 5vw;
+  }
+  .how-inner { max-width: 1100px; margin: 0 auto; }
+  .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-top: 40px; }
+  .how-step-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px; color: var(--green-light);
+    line-height: 1; margin-bottom: 12px;
+  }
+  .how-step-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .how-step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 5vw;
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px; color: var(--text);
+  }
+  .footer-logo span { color: var(--green-mid); }
+  .footer-text { font-size: 12px; color: var(--text-muted); }
+  .footer-disclaimer {
+    width: 100%; font-size: 11px; color: var(--text-muted);
+    border-top: 1px solid var(--border); padding-top: 20px; margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 5vw 40px; }
+    .hero-card { display: none; }
+    .nav-tagline { display: none; }
+    .hero h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    Clinic<span class="dot">Find</span>
+    <span class="nav-tagline">Las Piñas</span>
+  </a>
+  <div class="nav-badge">Free · No sign-up needed</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-label">Las Piñas City</div>
+    <h1>Find medical tests <em>near you</em> — with real prices</h1>
+    <p class="hero-sub">Compare CBC, X-ray, ultrasound, and more across local clinics. No guessing, no hidden fees. Free to use.</p>
+    <div class="hero-stats">
+      <div>
+        <span class="hero-stat-num">5</span>
+        <span class="hero-stat-label">Local clinics</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">20+</span>
+        <span class="hero-stat-label">Tests listed</span>
+      </div>
+      <div>
+        <span class="hero-stat-num">₱0</span>
+        <span class="hero-stat-label">Cost to use</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI SEARCH CARD -->
+  <div class="hero-card">
+    <p class="search-label">What test are you looking for?</p>
+    <div class="search-wrap">
+      <input type="text" id="heroSearch" placeholder="e.g. CBC, X-ray, Urinalysis..." oninput="heroFilter()">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+    </div>
+    <div class="quick-tags">
+      <span class="quick-tag active" onclick="setHeroTag(this,'')">All</span>
+      <span class="quick-tag" onclick="setHeroTag(this,'CBC')">CBC</span>
+      <span class="quick-tag" onclick="setHeroTag(this,'X-ray')">X-ray</span>
+      <span class="quick-tag" onclick="setHeroTag(this,'Ultrasound')">Ultrasound</span>
+      <span class="quick-tag" onclick="setHeroTag(this,'ECG')">ECG</span>
+      <span class="quick-tag" onclick="setHeroTag(this,'Drug Test')">Drug Test</span>
+    </div>
+    <div class="mini-results" id="miniResults"></div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- FULL SEARCH -->
+<section class="search-section" id="findSection">
+  <div class="section-header">
+    <div class="section-eyebrow">Browse all clinics</div>
+    <div class="section-title">Compare tests & prices</div>
+  </div>
+
+  <div class="search-controls">
+    <input type="text" id="mainSearch" placeholder="Search by test name..." oninput="renderMain()">
+    <select id="clinicFilter" onchange="renderMain()">
+      <option value="">All clinics</option>
+    </select>
+  </div>
+
+  <div class="filter-row" id="catChips"></div>
+  <div class="results-meta" id="resultsMeta"></div>
+  <div class="clinic-list" id="clinicList"></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="how-inner">
+    <div class="section-eyebrow">How it works</div>
+    <div class="section-title" style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);margin-top:10px;">Simple. Fast. Free.</div>
+    <div class="how-grid">
+      <div>
+        <div class="how-step-num">01</div>
+        <div class="how-step-title">Search your test</div>
+        <div class="how-step-desc">Type the medical test you need — CBC, X-ray, ultrasound, or others. No account needed.</div>
+      </div>
+      <div>
+        <div class="how-step-num">02</div>
+        <div class="how-step-title">Compare prices</div>
+        <div class="how-step-desc">See which clinics in Las Piñas offer the test and how much each one charges.</div>
+      </div>
+      <div>
+        <div class="how-step-num">03</div>
+        <div class="how-step-title">Contact the clinic</div>
+        <div class="how-step-desc">Click the clinic to see their phone number and email. Call them directly — no middleman.</div>
+      </div>
+      <div>
+        <div class="how-step-num">04</div>
+        <div class="how-step-title">Go & get tested</div>
+        <div class="how-step-desc">Visit the clinic at your convenience. Prices shown are verified and updated regularly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Clinic<span>Find</span></div>
+  <div class="footer-text">Las Piñas City · Prototype v0.1</div>
+  <div class="footer-disclaimer">
+    Prices are for reference only and may change without notice. Always confirm with the clinic before your visit. ClinicFind is not affiliated with any clinic listed on this site.
+  </div>
+</footer>
+
+<script>
+const CATS = ['All','Laboratory','Imaging','Cardiology','Pulmonology','Ophthalmology'];
+
+const CLINICS = [
+  {
+    id:1, name:'St. Luke\'s Medical Extension Clinic', area:'CAA Road, Pamplona',
+    phone:'(02) 8563-4444', email:'inquiries.laspinas@stlukes.com.ph',
+    tests:[
+      {name:'Complete Blood Count (CBC)',cat:'Laboratory',price:350},
+      {name:'Fasting Blood Sugar',cat:'Laboratory',price:180},
+      {name:'Urinalysis',cat:'Laboratory',price:150},
+      {name:'Chest X-ray (PA view)',cat:'Imaging',price:650},
+      {name:'12-lead ECG',cat:'Cardiology',price:450},
+    ]
+  },
+  {
+    id:2, name:'Las Piñas Doctors Hospital OPD', area:'Alabang-Zapote Rd, Pamplona Tres',
+    phone:'(02) 8842-0000', email:'opd@lpdhospital.ph',
+    tests:[
+      {name:'Complete Blood Count (CBC)',cat:'Laboratory',price:320},
+      {name:'Lipid Profile',cat:'Laboratory',price:580},
+      {name:'HbA1c',cat:'Laboratory',price:750},
+      {name:'Ultrasound (Whole Abdomen)',cat:'Imaging',price:1200},
+      {name:'Chest X-ray (PA view)',cat:'Imaging',price:600},
+      {name:'Pulmonary Function Test',cat:'Pulmonology',price:1500},
+    ]
+  },
+  {
+    id:3, name:'Ospital ng Las Piñas', area:'Pamplona Tres, Las Piñas City',
+    phone:'(02) 8805-9999', email:'info@olp.gov.ph',
+    tests:[
+      {name:'Complete Blood Count (CBC)',cat:'Laboratory',price:120},
+      {name:'Urinalysis',cat:'Laboratory',price:80},
+      {name:'Fecalysis',cat:'Laboratory',price:80},
+      {name:'Chest X-ray (PA view)',cat:'Imaging',price:350},
+      {name:'12-lead ECG',cat:'Cardiology',price:250},
+    ]
+  },
+  {
+    id:4, name:'PhilMed Diagnostic Center', area:'BF Homes, Las Piñas',
+    phone:'(02) 8826-7700', email:'hello@philmedlaspinas.com',
+    tests:[
+      {name:'HbA1c',cat:'Laboratory',price:700},
+      {name:'Thyroid Function Test (T3/T4/TSH)',cat:'Laboratory',price:1800},
+      {name:'Hepatitis B Surface Antigen',cat:'Laboratory',price:450},
+      {name:'Ultrasound (Whole Abdomen)',cat:'Imaging',price:1100},
+      {name:'2D Echo',cat:'Cardiology',price:2500},
+      {name:'Visual Acuity Test',cat:'Ophthalmology',price:300},
+    ]
+  },
+  {
+    id:5, name:'MedExpress Las Piñas', area:'Alabang-Zapote Rd, Las Piñas',
+    phone:'(02) 8519-3300', email:'laspinas@medexpress.ph',
+    tests:[
+      {name:'Drug Test (DOLE/pre-employment)',cat:'Laboratory',price:400},
+      {name:'Complete Blood Count (CBC)',cat:'Laboratory',price:300},
+      {name:'Fasting Blood Sugar',cat:'Laboratory',price:160},
+      {name:'Chest X-ray (PA view)',cat:'Imaging',price:580},
+    ]
+  }
+];
+
+let activeCat = 'All';
+let openCards = new Set();
+
+// HERO MINI SEARCH
+function heroFilter() {
+  const q = document.getElementById('heroSearch').value.toLowerCase().trim();
+  const box = document.getElementById('miniResults');
+  if (!q) { box.innerHTML = ''; return; }
+  const hits = [];
+  CLINICS.forEach(c => {
+    c.tests.forEach(t => {
+      if (t.name.toLowerCase().includes(q)) hits.push({clinic:c.name, test:t.name, price:t.price});
+    });
+  });
+  if (!hits.length) { box.innerHTML = '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:12px 0">No tests found</p>'; return; }
+  box.innerHTML = hits.slice(0,4).map((h,i) => `
+    <div class="mini-card" style="animation-delay:${i*0.06}s">
+      <div><div class="mini-card-name">${h.test}</div><div class="mini-card-loc">${h.clinic}</div></div>
+      <div class="mini-card-price">₱${h.price.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+function setHeroTag(el, q) {
+  document.querySelectorAll('.quick-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('heroSearch').value = q;
+  heroFilter();
+}
+
+// BUILD CLINIC SELECT
+function buildSelect() {
+  const sel = document.getElementById('clinicFilter');
+  CLINICS.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+
+// BUILD CATEGORY CHIPS
+function buildChips() {
+  document.getElementById('catChips').innerHTML = CATS.map(c =>
+    `<button class="chip${c===activeCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setCat(c) { activeCat = c; renderMain(); }
+
+// MAIN RENDER
+function renderMain() {
+  buildChips();
+  const q = document.getElementById('mainSearch').value.toLowerCase().trim();
+  const cid = parseInt(document.getElementById('clinicFilter').value) || 0;
+
+  const results = CLINICS.map(clinic => {
+    if (cid && clinic.id !== cid) return null;
+    const tests = clinic.tests.filter(t => {
+      const catOk = activeCat === 'All' || t.cat === activeCat;
+      const qOk = !q || t.name.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q);
+      return catOk && qOk;
+    });
+    return tests.length ? {...clinic, tests} : null;
+  }).filter(Boolean);
+
+  document.getElementById('resultsMeta').textContent =
+    results.length ? `${results.length} clinic${results.length > 1 ? 's' : ''} found` : '';
+
+  const list = document.getElementById('clinicList');
+  if (!results.length) {
+    list.innerHTML = `<div class="no-results"><div class="no-results-icon">🔍</div><p>No clinics found for this search.<br>Try a different test name or category.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = results.map(clinic => {
+    const isOpen = openCards.has(clinic.id);
+    return `
+      <div class="clinic-card${isOpen?' open':''}" id="card-${clinic.id}">
+        <div class="clinic-top" onclick="toggleCard(${clinic.id})">
+          <div class="clinic-left">
+            <div class="clinic-avatar">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div>
+              <div class="clinic-name">${clinic.name}</div>
+              <div class="clinic-loc">📍 ${clinic.area}</div>
+            </div>
+          </div>
+          <div class="clinic-right">
+            <span class="test-count">${clinic.tests.length} test${clinic.tests.length>1?'s':''}</span>
+            <span class="chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+        <div class="clinic-body">
+          <div class="tests-label">Available tests & prices</div>
+          <div class="tests-grid">
+            ${clinic.tests.map(t => `
+              <div class="test-pill">
+                <div class="test-pill-name">${t.name}</div>
+                <div class="test-pill-cat">${t.cat}</div>
+                <div class="test-pill-price">₱${t.price.toLocaleString()}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="contact-strip">
+            <a href="tel:${clinic.phone}" class="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+              ${clinic.phone}
+            </a>
+            <a href="mailto:${clinic.email}" class="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              ${clinic.email}
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCard(id) {
+  if (openCards.has(id)) openCards.delete(id);
+  else openCards.add(id);
+  renderMain();
+}
+
+buildSelect();
+renderMain();
+heroFilter();
+</script>
+</body>
+</html>
